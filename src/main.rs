@@ -1,11 +1,32 @@
-use clap::Parser;
+use clap::{Parser, Subcommand};
 use rand::Rng;
 
-#[derive(Parser, Debug)]
+#[derive(Parser)]
 #[command(version, about, long_about = None)]
 struct Args {
-    #[arg(short, long, default_value_t = 16)]
-    length: i32,
+    #[clap(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    Generate {
+        #[arg(short, long, default_value_t = 16)]
+        length: i32,
+
+        #[arg(short, long, default_value_t = String::new())]
+        file: String,
+    },
+    Add {
+        #[arg(short, long)]
+        uname: String,
+
+        #[arg(short, long)]
+        site_url: String,
+
+        #[arg(short, long)]
+        pw: String,
+    },
 }
 
 static CHARACTERS: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789$&!@#";
@@ -22,5 +43,13 @@ fn generate_password(length: i32) -> String {
 
 fn main() {
     let args = Args::parse();
-    println!("Generated password: {}", generate_password(args.length));
+
+    match args.command {
+        Commands::Add { uname, site_url, pw } => {
+            println!("Adding password details: name: {:?}, url: {}, pw: {}", uname, site_url, pw);
+        }
+        Commands::Generate { length, file: _ } => {
+            println!("Generated password: {}", generate_password(length));
+        }
+    }
 }
